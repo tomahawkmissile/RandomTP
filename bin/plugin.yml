@@ -1,0 +1,20 @@
+name: RandomTP
+version: 1.0
+description: Randomly teleport
+author: Tomahawkmissile
+main: com.gmail.tomahawkmissile2.rtp.Main
+api-version: 1.15
+commands:
+  rtp:
+    description: Teleport randomly
+    usage: /rtp
+  wild:
+    description: Alias to rtp command
+    usage: /wild
+permissions:
+  rtp.use:
+    description: Use RTP to teleport.
+    default: true
+  rtp.unlimited:
+    description: Use RTP without cooldown.
+    default: op
