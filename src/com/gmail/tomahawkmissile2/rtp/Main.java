@@ -51,6 +51,11 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
 	}
 	public void onDisable() {
 		stopChecker.set(true);
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		System.out.println(ChatColor.DARK_GREEN+"[RTP]"+ChatColor.GREEN+" Successfully stopped cooldown watchdog thread.");
 	}
 	public void runChecker() {
@@ -85,13 +90,13 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
 			} catch(NumberFormatException e) {
 				System.out.println("[RTP] Config error! Invalid setting for cooldown!");
 			}
-			cooldown.putIfAbsent(p, cool);
+			cooldown.put(p, cool);
 		}
 	}
 	public void tpPlayerWhenSafe(Player p) {
 		p.sendMessage(ChatColor.GOLD+"[RTP]"+ChatColor.YELLOW+" Finding safe location in world.");
 		queuePlayerTimer(p);
-		new Thread() {
+		new BukkitRunnable() {
 			@Override
 			public void run() {
 				String worldName = (String)Config.get("world");
@@ -113,8 +118,8 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
 					maxx=2500;
 					maxz=2500;
 				}
-				int x = (int)(Math.random()*(maxx+1));
-				int z = (int)(Math.random()*(maxz+1));
+				int x = (int)((Math.random()-0.5)*(maxx-0.5)*2);
+				int z = (int)((Math.random()-0.5)*(maxz-0.5)*2);
 				for(int i=255;i>=0;i--) {
 					Block b = tp.getBlockAt(new Location(tp, x, i, z));
 					if(b.getType()!=Material.AIR) {
@@ -142,19 +147,22 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
 						case KELP:
 						case BEDROCK:
 						case COBWEB:
+						case BUBBLE_COLUMN:
 							i=255;
 							x+=(Math.random()-0.5)*(20);
 							z+=(Math.random()-0.5)*(20);
 							break;
 						default:
 							queuePlayerTimer(p);
-							new SafeTp(p, tp, x, i+1, z).run();
+							p.teleport(new Location(tp,x+0.5,i+1,z+0.5));
+							p.sendMessage(ChatColor.DARK_GREEN+"[RTP]"+ChatColor.GREEN+" Teleporting to safe location in world.");
+							//new SafeTp(p, tp, x, i+1, z).run();
 							return;
 						}
 					}
 				}
 			}
-		}.start();
+		}.runTask(Main.plugin);
 	}
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -176,6 +184,7 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
 		return false;
 	}
 }
+/*
 class SafeTp implements Runnable {
 	private World w;
 	private int x,y,z;
@@ -192,11 +201,6 @@ class SafeTp implements Runnable {
 		new BukkitRunnable() {
 			@Override
 			public void run() {
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
 				p.teleport(new Location(w,x+0.5,y,z+0.5));
 				p.sendMessage(ChatColor.DARK_GREEN+"[RTP]"+ChatColor.GREEN+" Teleporting to safe location in world.");
 			}
@@ -204,3 +208,4 @@ class SafeTp implements Runnable {
 	}
 	
 }
+*/
